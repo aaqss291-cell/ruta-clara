@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Prototipo Fase 4: Ruta clara, ciclo semanal de aprendizaje virtual accesible.">
+<title>Ruta clara</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: una sola columna estrecha, un momento a la vez, navegación fija y predecible arriba. */
+:root{
+  --bg:#F2F5FD; --surface:#FFFFFF; --fg:#1F2340; --muted:#4F5679; --line:#D3D9F1;
+  --accent:#3B4FD8; --accent-fg:#FFFFFF; --accent-soft:#E3E8FD; --warn:#B3410B; --warn-soft:#FFEFD9; --ok:#1B7A43;
+  --font:'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:18px;line-height:1.6;padding-block:0 3rem;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:46rem;margin-inline:auto}
+h1,h2,h3{line-height:1.25;text-wrap:balance;margin:0}
+h1{font-size:1.6rem} h2{font-size:1.4rem;margin-bottom:.5rem} h3{font-size:1.1rem;margin:1.5rem 0 .4rem}
+p{margin:.5rem 0} ul,ol{padding-left:1.3rem;margin:.5rem 0}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:3px}
+.skip{position:absolute;left:-999px;top:0;background:var(--accent);color:var(--accent-fg);padding:.6rem 1rem;z-index:20}
+.skip:focus{left:8px;top:8px}
+header.top{padding-block:1.2rem .6rem}
+.eyebrow{font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0}
+.sub{color:var(--muted);margin:.2rem 0 0}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding-block:.6rem;z-index:5;border-bottom:1px solid var(--line)}
+.prog{display:flex;align-items:center;gap:.7rem;font-size:.95rem;margin-bottom:.5rem}
+.prog progress{flex:1;height:14px;accent-color:var(--accent)}
+nav ul{list-style:none;padding:0;margin:0;display:flex;gap:.4rem;flex-wrap:wrap}
+nav button{font:inherit;font-size:.9rem;background:var(--surface);color:var(--fg);border:2px solid var(--line);border-radius:8px;padding:.35rem .6rem;cursor:pointer;min-height:44px}
+nav button[aria-current="page"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent);font-weight:700}
+section.panel{padding-block:1.4rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem;margin:1rem 0}
+.goal{background:var(--accent-soft);border-radius:10px;padding:.8rem 1rem;margin:.8rem 0}
+.note{background:var(--warn-soft);color:var(--fg);border-radius:10px;padding:.7rem 1rem;margin:.8rem 0;font-size:.95rem}
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+th,td{border-bottom:1px solid var(--line);padding:.5rem .4rem;text-align:left;vertical-align:top}
+th{font-size:.85rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.scroll{overflow-x:auto}
+.btn{font:inherit;background:var(--accent);color:var(--accent-fg);border:2px solid var(--accent);border-radius:8px;padding:.55rem 1rem;cursor:pointer;min-height:44px;font-weight:700}
+.btn.alt{background:transparent;color:var(--accent)}
+.row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+.chk{display:flex;gap:.7rem;align-items:flex-start;padding:.45rem 0}
+.chk input{width:24px;height:24px;margin-top:.15rem;flex:none;accent-color:var(--accent)}
+label.f{display:block;font-weight:700;margin:.9rem 0 .25rem}
+input[type=text],textarea,select,input[type=file]{font:inherit;width:100%;max-width:100%;padding:.55rem;border:2px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)}
+textarea{min-height:6.5rem}
+.tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin:.8rem 0}
+.tabs button{font:inherit;background:var(--surface);color:var(--fg);border:2px solid var(--line);border-radius:8px;padding:.5rem .9rem;min-height:44px;cursor:pointer}
+.tabs button[aria-selected="true"]{border-color:var(--accent);background:var(--accent-soft);font-weight:700}
+.stage{background:var(--accent-soft);border-radius:10px;padding:1.2rem;min-height:11rem;display:flex;flex-direction:column;justify-content:center;gap:.6rem}
+.stage .big{font-size:1.5rem;font-weight:700;line-height:1.3}
+.cap{background:#1F2340;color:#fff;border-radius:6px;padding:.5rem .8rem;font-size:1rem}
+.ok{color:var(--ok);font-weight:700} .bad{color:var(--warn);font-weight:700}
+details{border-bottom:1px solid var(--line);padding:.6rem 0}
+summary{cursor:pointer;font-weight:700;min-height:32px}
+fieldset{border:2px solid var(--line);border-radius:10px;margin:.8rem 0;padding:.6rem 1rem}
+legend{font-weight:700;padding-inline:.3rem}
+.opt{display:flex;gap:.6rem;align-items:flex-start;padding:.3rem 0}
+.opt input{width:22px;height:22px;flex:none;margin-top:.2rem;accent-color:var(--accent)}
+.tools{display:flex;justify-content:flex-end;gap:.5rem;padding-top:.5rem}
+.tools button{font:inherit;font-size:.85rem;background:none;border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:.2rem .6rem;cursor:pointer}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.map{list-style:none;padding:0;margin:.6rem 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:.7rem;counter-reset:s}
+.map li{background:var(--surface);border:2px solid var(--line);border-radius:10px;padding:.8rem .9rem;display:flex;flex-direction:column;gap:.25rem;counter-increment:s;position:relative}
+.map li::before{content:counter(s);position:absolute;top:-.7rem;left:.8rem;background:var(--accent);color:var(--accent-fg);width:1.6rem;height:1.6rem;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:.9rem}
+.map .when{font-size:.8rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-top:.4rem}
+.map strong{font-size:1.15rem}
+.sent{display:flex;gap:.7rem;align-items:flex-start;width:100%;text-align:left;font:inherit;background:var(--surface);color:var(--fg);border:2px dashed var(--line);border-radius:8px;padding:.6rem .7rem;margin:.4rem 0;cursor:pointer;line-height:1.5}
+.sent .mk{flex:none;width:2rem;height:2rem;border-radius:50%;display:grid;place-items:center;font-weight:700;background:var(--accent-soft);color:var(--accent)}
+.sent[data-m="★"]{border:2px solid var(--accent);background:var(--accent-soft)}
+.sent[data-m="→"]{border:2px solid var(--ok)}
+.sent[data-m="?"]{border:2px solid var(--warn);background:var(--warn-soft)}
+.sent.good{outline:3px solid var(--ok)} .sent.miss{outline:3px solid var(--warn)}
+#annotFb p{margin:.3rem 0}
+.big-text .wrap{font-size:1.15em}
+</style>
+<style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+
+<a class="skip" href="#main">Saltar al contenido</a>
+<div class="wrap">
+<header class="top">
+  <p class="eyebrow">LIDE 7060 · Prototipo Fase 4 · Módulo piloto</p>
+  <h1>Ruta clara</h1>
+  <p class="sub">Semana 3: Lectura estratégica de textos académicos</p>
+</header>
+</div>
+<div class="bar"><div class="wrap">
+  <div class="prog"><span id="progLabel">Tu avance: 0 %</span><progress id="prog" max="100" value="0" aria-labelledby="progLabel"></progress></div>
+  <nav aria-label="Momentos del módulo"><ul id="nav"></ul></nav>
+  <div class="tools"><button id="bigBtn" aria-pressed="false">Aumentar tamaño de letra</button><button id="resetBtn">Borrar mi progreso</button></div>
+</div></div>
+
+<main id="main" class="wrap" tabindex="-1">
+
+<!-- MOMENTO 1 -->
+<section class="panel" id="m1" data-title="1 Inicio" aria-labelledby="h-m1">
+  <h2 id="h-m1">Momento 1: Inicio y orientación</h2>
+  <p>Esta semana aprenderás una rutina de tres pasos para leer artículos académicos sin perderte. Calcula unas 3 horas en total, repartidas en la semana.</p>
+  <div class="goal"><strong>Objetivos de la semana.</strong> Al terminar podrás:
+    <ol><li>Previsualizar un artículo para predecir su idea central.</li><li>Anotar mientras lees usando un código de tres marcas.</li><li>Resumir el artículo en tres oraciones con evidencia.</li></ol></div>
+  <div class="card">
+    <h3 style="margin-top:0">Cómo usar esta página</h3>
+    <ol>
+      <li>Avanza en orden con el botón azul al final de cada momento, o salta con el menú de arriba.</li>
+      <li>Marca cada casilla al terminar una tarea. La barra de avance sube sola.</li>
+      <li>Lo que escribes se guarda en tu navegador. Equivocarte en las prácticas no baja tu nota.</li>
+    </ol>
+  </div>
+  <fieldset id="preBox"><legend>¿Qué tanto sabes ya sobre leer artículos académicos?</legend>
+    <div class="opt"><input type="radio" name="pre" id="pre1" value="1"><label for="pre1">Casi nada, es nuevo para mí</label></div>
+    <div class="opt"><input type="radio" name="pre" id="pre2" value="2"><label for="pre2">Algo, pero me pierdo con frecuencia</label></div>
+    <div class="opt"><input type="radio" name="pre" id="pre3" value="3"><label for="pre3">Bastante, quiero afinar mi método</label></div>
+    <p id="preMsg" role="status" aria-live="polite"></p>
+  </fieldset>
+  <h3>Agenda ejecutiva de la semana</h3>
+  <div class="scroll"><table>
+    <caption class="eyebrow" style="text-align:left">Tiempos estimados. Puedes mover las tareas dentro de la semana, menos la entrega.</caption>
+    <thead><tr><th>Día sugerido</th><th>Tarea</th><th>Tiempo</th><th>Fecha límite</th></tr></thead>
+    <tbody>
+      <tr><td>Lunes</td><td>Momentos 1 y 2: orientación y estudio del contenido</td><td>45 min</td><td>Miércoles</td></tr>
+      <tr><td>Martes</td><td>Momento 3: práctica guiada, hitos 1 y 2</td><td>60 min</td><td>Jueves</td></tr>
+      <tr><td>Jueves</td><td>Momento 3: hito 3 y avance formativo</td><td>30 min</td><td>Viernes</td></tr>
+      <tr><td>Sábado</td><td>Momento 4: entrega del producto</td><td>30 min</td><td><strong>Domingo 11:59 p. m.</strong></td></tr>
+      <tr><td>Domingo</td><td>Momento 5: reflexión y cierre</td><td>15 min</td><td>Domingo 11:59 p. m.</td></tr>
+    </tbody></table></div>
+  <div class="card">
+    <h3 style="margin-top:0">Lista de verificación de inicio</h3>
+    <div class="chk"><input type="checkbox" id="c1" data-task><label for="c1">Leí los objetivos de la semana.</label></div>
+    <div class="chk"><input type="checkbox" id="c2" data-task><label for="c2">Anoté en mi calendario los días en que voy a trabajar.</label></div>
+    <div class="chk"><input type="checkbox" id="c3" data-task><label for="c3">Revisé la rúbrica del Momento 4 para saber qué se evalúa.</label></div>
+    <div class="chk"><input type="checkbox" id="c4" data-task><label for="c4">Sé dónde preguntar dudas (pestaña «Dudas»).</label></div>
+  </div>
+  <button class="btn" data-go="m2">Continuar al Momento 2</button>
+</section>
+
+<!-- MOMENTO 2 -->
+<section class="panel" id="m2" data-title="2 Contenido" aria-labelledby="h-m2" hidden>
+  <h2 id="h-m2">Momento 2: Acceso multimodal</h2>
+  <p>El mismo contenido está en tres formatos equivalentes. Escoge el que te canse menos. Puedes cambiar cuando quieras.</p>
+  <h3 style="margin-top:.8rem">Mapa de la rutina</h3>
+  <ol class="map" aria-label="Los tres pasos de la rutina de lectura">
+    <li><span class="when">Antes de leer · 5 min</span><strong>Previsualiza</strong><span>Título, resumen y subtítulos. Escribe una predicción.</span></li>
+    <li><span class="when">Mientras lees</span><strong>Anota</strong><span>? duda · ★ idea principal · → evidencia.</span></li>
+    <li><span class="when">Después de leer · 10 min</span><strong>Resume</strong><span>Tres oraciones: problema, hallazgo, evidencia.</span></li>
+  </ol>
+  <div class="tabs" role="tablist" aria-label="Formato del contenido" id="fmt">
+    <button role="tab" id="t-txt" aria-selected="true" aria-controls="p-txt">Leer</button>
+    <button role="tab" id="t-aud" aria-selected="false" aria-controls="p-aud" tabindex="-1">Escuchar</button>
+    <button role="tab" id="t-vid" aria-selected="false" aria-controls="p-vid" tabindex="-1">Ver</button>
+  </div>
+
+  <div role="tabpanel" id="p-txt" aria-labelledby="t-txt">
+    <div class="card" id="readText">
+      <h3 style="margin-top:0">Leer un artículo en tres pasos</h3>
+      <p><strong>Paso 1. Antes de leer: previsualiza (5 minutos).</strong> Mira el título, el resumen o abstract, los subtítulos y la última sección. Con eso, escribe una predicción de una oración: «Creo que este artículo trata de…».</p>
+      <p><strong>Paso 2. Mientras lees: anota con tres marcas.</strong> Usa un signo de interrogación (?) en lo que no entiendes, una estrella (★) en la idea principal de cada sección y una flecha (→) donde el autor presenta evidencia. Lee por secciones y haz una pausa corta entre una y otra.</p>
+      <p><strong>Paso 3. Después de leer: resume en tres oraciones.</strong> Oración 1: la pregunta o problema. Oración 2: lo que encontró o argumentó el autor. Oración 3: la evidencia que más pesa.</p>
+      <div class="note">Idea clave: no hace falta leer todo en orden ni de una sola vez. Leer con un plan reduce el esfuerzo.</div>
+    </div>
+  </div>
+
+  <div role="tabpanel" id="p-aud" aria-labelledby="t-aud" hidden>
+    <div class="card">
+      <h3 style="margin-top:0">Versión en audio</h3>
+      <p>Presiona Reproducir para escuchar el texto con la voz de tu dispositivo. En el prototipo se usa lectura por voz del navegador; en el LMS final se cargaría el audio grabado.</p>
+      <div class="row">
+        <button class="btn" id="audPlay">Reproducir</button>
+        <button class="btn alt" id="audStop">Detener</button>
+        <label for="audRate">Velocidad</label>
+        <select id="audRate" style="width:auto"><option value="0.8">Lenta</option><option value="1" selected>Normal</option><option value="1.25">Rápida</option></select>
+      </div>
+      <p id="audMsg" role="status" aria-live="polite" class="sub"></p>
+      <details><summary>Transcripción</summary><p id="audTranscript"></p></details>
+    </div>
+  </div>
+
+  <div role="tabpanel" id="p-vid" aria-labelledby="t-vid" hidden>
+    <div class="card">
+      <h3 style="margin-top:0">Micro-video explicativo (1 min)</h3>
+      <div class="stage" id="vidStage" aria-label="Escena del video"><div class="big" id="vidBig"></div></div>
+      <div class="cap" id="vidCap" aria-live="off">Subtítulos</div>
+      <div class="row" style="margin-top:.6rem">
+        <button class="btn" id="vidPlay">Reproducir</button>
+        <button class="btn alt" id="vidPrev">Escena anterior</button>
+        <button class="btn alt" id="vidNext">Escena siguiente</button>
+        <span id="vidPos" class="sub"></span>
+      </div>
+      <p class="sub">Prototipo: escenas animadas con subtítulos. En el LMS final se sustituye por un video grabado con subtítulos.</p>
+      <details open><summary>Transcripción completa</summary><ol id="vidTranscript"></ol></details>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Comprueba lo que entendiste (sin nota)</h3>
+    <p class="sub">Puedes intentarlo las veces que quieras. Es para practicar, no cuenta para tu calificación.</p>
+    <div id="quiz"></div>
+  </div>
+  <div class="chk"><input type="checkbox" id="c5" data-task><label for="c5">Estudié el contenido en el formato que escogí.</label></div>
+  <div class="chk"><input type="checkbox" id="c6" data-task><label for="c6">Completé la comprobación de lectura.</label></div>
+  <button class="btn" data-go="m3">Continuar al Momento 3</button>
+</section>
+
+<!-- MOMENTO 3 -->
+<section class="panel" id="m3" data-title="3 Práctica" aria-labelledby="h-m3" hidden>
+  <h2 id="h-m3">Momento 3: Práctica guiada</h2>
+  <p>Vas a aplicar la rutina a un párrafo de ejemplo, en tres hitos. Puedes parar después de cualquiera.</p>
+  <div class="card">
+    <h3 style="margin-top:0">Texto de práctica</h3>
+    <p><strong>Practica anotando.</strong> Toca una oración para cambiar su marca: sin marca, ★ idea principal, → evidencia, ? duda. Luego presiona «Comprobar mis marcas».</p>
+    <div id="annot" role="group" aria-label="Oraciones del texto de práctica"></div>
+    <div class="row" style="margin-top:.6rem"><button class="btn alt" id="annotCheck">Comprobar mis marcas</button><button class="btn alt" id="annotReset">Empezar de nuevo</button></div>
+    <div id="annotFb" role="status" aria-live="polite"></div>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Guía paso a paso</h3>
+    <div class="chk"><input type="checkbox" id="h1" data-task><label for="h1"><strong>Hito 1 (15 min).</strong> Escribe tu predicción: ¿de qué trata el texto? Usa el campo 1 de la plantilla.</label></div>
+    <div class="chk"><input type="checkbox" id="h2" data-task><label for="h2"><strong>Hito 2 (20 min).</strong> Marca en tu cuaderno o en el texto: ★ idea principal, → evidencia, ? duda. Anota cuántas marcas usaste en el campo 2.</label></div>
+    <div class="chk"><input type="checkbox" id="h3" data-task><label for="h3"><strong>Hito 3 (25 min).</strong> Escribe tu resumen de tres oraciones en el campo 3.</label></div>
+    <details><summary>Ver ejemplo resuelto</summary>
+      <p><strong>Predicción:</strong> Creo que el texto trata de cómo estudiar por bloques ayuda a aprender.</p>
+      <p><strong>Resumen:</strong> (1) El texto compara estudiar en bloques cortos con una sesión larga. (2) Concluye que los bloques mejoran la atención y reducen la fatiga. (3) La evidencia principal es un estudio con 120 universitarios donde el grupo de bloques obtuvo 18 % más de aciertos.</p></details>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Plantilla de trabajo</h3>
+    <p class="sub">Se guarda sola en este navegador mientras escribes.</p>
+    <label class="f" for="w1">1. Mi predicción</label><textarea id="w1" data-save></textarea>
+    <label class="f" for="w2">2. Mis marcas (¿cuántas ★, → y ? usé?)</label><textarea id="w2" data-save></textarea>
+    <label class="f" for="w3">3. Mi resumen en tres oraciones</label><textarea id="w3" data-save></textarea>
+    <div class="row" style="margin-top:.8rem"><button class="btn" id="sendAvance">Enviar avance para retroalimentación</button><span id="avMsg" role="status" aria-live="polite"></span></div>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Intercambio con compañeros (asincrónico)</h3>
+    <p>Comparte tu resumen y comenta el de otra persona usando esta estructura: <em>«Algo que entendí claro es… Una pregunta que tengo es…»</em></p>
+    <label class="f" for="peer">Tu comentario para un compañero</label><textarea id="peer" data-save></textarea>
+    <div class="row" style="margin-top:.6rem"><button class="btn alt" id="peerBtn">Publicar comentario</button><span id="peerMsg" role="status" aria-live="polite"></span></div>
+  </div>
+  <button class="btn" data-go="m4">Continuar al Momento 4</button>
+</section>
+
+<!-- MOMENTO 4 -->
+<section class="panel" id="m4" data-title="4 Evidencia" aria-labelledby="h-m4" hidden>
+  <h2 id="h-m4">Momento 4: Demostración y evidencia</h2>
+  <p>Entrega tu resumen de tres oraciones sobre un artículo de tu elección. Escoge el formato en que puedas mostrar mejor lo que sabes. Las tres opciones se evalúan con la misma rúbrica.</p>
+  <h3>Rúbrica analítica (visible desde el inicio)</h3>
+  <div class="scroll"><table>
+    <thead><tr><th>Criterio</th><th>Logrado (4)</th><th>En desarrollo (2)</th><th>Por iniciar (1)</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Idea central</th><td>Identifica con precisión la pregunta o problema del artículo.</td><td>Identifica el tema, pero no el problema.</td><td>No identifica la idea central.</td></tr>
+      <tr><th scope="row">Evidencia</th><td>Cita el dato o argumento que más pesa y lo explica.</td><td>Menciona evidencia sin explicarla.</td><td>No incluye evidencia.</td></tr>
+      <tr><th scope="row">Síntesis</th><td>Resume en tres oraciones con sus propias palabras.</td><td>Se acerca al texto original o excede las tres oraciones.</td><td>Copia fragmentos del texto.</td></tr>
+      <tr><th scope="row">Claridad</th><td>La estructura es fácil de seguir en el formato escogido.</td><td>Se entiende con esfuerzo.</td><td>Es difícil de seguir.</td></tr>
+    </tbody></table></div>
+  <form class="card" id="subForm">
+    <fieldset><legend>Formato de entrega</legend>
+      <div class="opt"><input type="radio" name="fmtE" id="fe1" value="texto" checked><label for="fe1">Texto escrito</label></div>
+      <div class="opt"><input type="radio" name="fmtE" id="fe2" value="audio"><label for="fe2">Audio explicativo (máx. 2 min)</label></div>
+      <div class="opt"><input type="radio" name="fmtE" id="fe3" value="video"><label for="fe3">Video o presentación visual (máx. 2 min)</label></div>
+    </fieldset>
+    <label class="f" for="subRef">Referencia del artículo que leíste</label><input type="text" id="subRef" placeholder="Autor (año). Título. Revista.">
+    <div id="subText"><label class="f" for="subBody">Tu resumen</label><textarea id="subBody"></textarea></div>
+    <div id="subFile" hidden><label class="f" for="subUp">Archivo (audio o video)</label><input type="file" id="subUp" accept="audio/*,video/*,.pdf"></div>
+    <div class="row" style="margin-top:1rem"><button class="btn" type="submit">Entregar</button><span id="subMsg" role="status" aria-live="polite"></span></div>
+  </form>
+  <div class="chk"><input type="checkbox" id="c7" data-task><label for="c7">Revisé mi entrega contra la rúbrica antes de enviarla.</label></div>
+  <button class="btn" data-go="m5">Continuar al Momento 5</button>
+</section>
+
+<!-- MOMENTO 5 -->
+<section class="panel" id="m5" data-title="5 Cierre" aria-labelledby="h-m5" hidden>
+  <h2 id="h-m5">Momento 5: Cierre y reflexión</h2>
+  <div class="card">
+    <h3 style="margin-top:0">Resumen de logros</h3>
+    <p id="logros">Aún no has marcado tareas.</p>
+  </div>
+  <form class="card" id="refForm">
+    <h3 style="margin-top:0">Reflexión metacognitiva</h3>
+    <label class="f" for="r1">¿Qué estrategia de lectura te funcionó mejor esta semana?</label><textarea id="r1" data-save></textarea>
+    <label class="f" for="r2">¿Qué cambiarías en tu planificación la próxima semana?</label><textarea id="r2" data-save></textarea>
+    <div class="row" style="margin-top:.8rem"><button class="btn" type="submit">Guardar reflexión</button><span id="refMsg" role="status" aria-live="polite"></span></div>
+  </form>
+  <form class="card" id="useForm">
+    <h3 style="margin-top:0">Cuestionario de usabilidad y carga mental</h3>
+    <p class="sub">Para evaluar el prototipo. Marca de 1 (nada) a 5 (mucho).</p>
+    <div id="useItems"></div>
+    <div class="row" style="margin-top:.8rem"><button class="btn" type="submit">Enviar cuestionario</button><span id="useMsg" role="status" aria-live="polite"></span></div>
+  </form>
+  <div class="chk"><input type="checkbox" id="c8" data-task><label for="c8">Completé mi reflexión.</label></div>
+</section>
+
+<!-- DUDAS -->
+<section class="panel" id="faq" data-title="Dudas" aria-labelledby="h-faq" hidden>
+  <h2 id="h-faq">Dudas y comunicación</h2>
+  <div class="goal"><strong>Tiempo de respuesta docente:</strong> dentro de 24 horas hábiles. Las preguntas publicadas antes del viernes a las 12:00 m. se contestan antes del fin de semana.</div>
+  <h3>Preguntas frecuentes</h3>
+  <details><summary>¿Puedo entregar en audio o video en vez de texto?</summary><p>Sí. Los tres formatos se evalúan con la misma rúbrica.</p></details>
+  <details><summary>¿Qué pasa si no termino una tarea a tiempo?</summary><p>Escribe en el foro antes de la fecha límite. Se acuerda una nueva fecha sin penalidad para la primera solicitud.</p></details>
+  <details><summary>¿La comprobación de lectura cuenta para la nota?</summary><p>No. Sirve para que practiques.</p></details>
+  <details><summary>¿Cómo cambio el formato del contenido?</summary><p>En el Momento 2 usa las pestañas Leer, Escuchar y Ver.</p></details>
+  <h3>Foro de dudas</h3>
+  <p><strong>Normas de participación:</strong> una pregunta por mensaje, título claro, respeto a todas las personas y sin publicar datos personales.</p>
+  <form class="card" id="forumForm">
+    <label class="f" for="fq">Escribe tu pregunta</label><textarea id="fq"></textarea>
+    <div class="row" style="margin-top:.6rem"><button class="btn" type="submit">Publicar pregunta</button><span id="fMsg" role="status" aria-live="polite"></span></div>
+  </form>
+  <ul id="fList" aria-label="Preguntas publicadas"></ul>
+</section>
+</main>
+
+<script>
+(function(){
+var SECS=['m1','m2','m3','m4','m5','faq'];
+var store={get:function(k){try{return localStorage.getItem('rc_'+k)}catch(e){return null}},set:function(k,v){try{localStorage.setItem('rc_'+k,v)}catch(e){}},clear:function(){try{Object.keys(localStorage).filter(function(k){return k.indexOf('rc_')===0}).forEach(function(k){localStorage.removeItem(k)})}catch(e){}}};
+var $=function(i){return document.getElementById(i)};
+
+/* nav */
+var nav=$('nav');
+SECS.forEach(function(id){var li=document.createElement('li'),b=document.createElement('button');b.textContent=$(id).dataset.title;b.dataset.s=id;b.addEventListener('click',function(){show(id,true)});li.appendChild(b);nav.appendChild(li)});
+function show(id,focus){SECS.forEach(function(s){$(s).hidden=(s!==id)});nav.querySelectorAll('button').forEach(function(b){if(b.dataset.s===id)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});try{history.replaceState(null,'','#'+id)}catch(e){}if(focus){var h=$(id).querySelector('h2');h.setAttribute('tabindex','-1');h.focus();window.scrollTo(0,0)}}
+document.querySelectorAll('[data-go]').forEach(function(b){b.addEventListener('click',function(){show(b.dataset.go,true)})});
+var start=(location.hash||'#m1').slice(1);show(SECS.indexOf(start)>-1?start:'m1',false);
+
+/* progress + persistence */
+var tasks=[].slice.call(document.querySelectorAll('[data-task]'));
+function upd(){var d=tasks.filter(function(t){return t.checked}).length,p=Math.round(100*d/tasks.length);$('prog').value=p;$('progLabel').textContent='Tu avance: '+p+' %'+(p===100?' · ¡Módulo completo!':p>=50?' · ¡Ya pasaste la mitad!':p>0?' · ¡Buen comienzo!':'');$('logros').textContent=d?('Completaste '+d+' de '+tasks.length+' tareas de esta semana.'+(d===tasks.length?' Terminaste el módulo.':' Te faltan '+(tasks.length-d)+'.')):'Aún no has marcado tareas.'}
+tasks.forEach(function(t){t.checked=store.get(t.id)==='1';t.addEventListener('change',function(){store.set(t.id,t.checked?'1':'0');upd()})});
+document.querySelectorAll('[data-save]').forEach(function(t){var v=store.get(t.id);if(v)t.value=v;t.addEventListener('input',function(){store.set(t.id,t.value)})});
+upd();
+$('resetBtn').addEventListener('click',function(){store.clear();tasks.forEach(function(t){t.checked=false});document.querySelectorAll('[data-save]').forEach(function(t){t.value=''});upd()});
+$('bigBtn').addEventListener('click',function(){var on=this.getAttribute('aria-pressed')!=='true';this.setAttribute('aria-pressed',on);document.body.style.fontSize=on?'21px':'18px';this.textContent=on?'Tamaño de letra normal':'Aumentar tamaño de letra'});
+
+/* format tabs */
+var tabs=['txt','aud','vid'];
+function selTab(k){tabs.forEach(function(x){var on=x===k;$('t-'+x).setAttribute('aria-selected',on);$('t-'+x).tabIndex=on?0:-1;$('p-'+x).hidden=!on});if(k!=='aud')stopAud();if(k!=='vid')stopVid()}
+tabs.forEach(function(k,i){var b=$('t-'+k);b.addEventListener('click',function(){selTab(k)});b.addEventListener('keydown',function(e){var n=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;if(n){var j=(i+n+3)%3;selTab(tabs[j]);$('t-'+tabs[j]).focus()}})});
+
+/* audio (speechSynthesis) */
+var txt=$('readText').innerText.replace(/Idea clave:.*/,'').trim();
+$('audTranscript').textContent=txt;
+var synth=window.speechSynthesis;
+function stopAud(){if(synth)synth.cancel();$('audPlay').textContent='Reproducir'}
+$('audPlay').addEventListener('click',function(){
+  if(!synth||!window.SpeechSynthesisUtterance){$('audMsg').textContent='Tu navegador no ofrece lectura por voz. Usa la transcripción.';return}
+  if(synth.speaking&&!synth.paused){synth.pause();this.textContent='Continuar';return}
+  if(synth.paused){synth.resume();this.textContent='Pausar';return}
+  var u=new SpeechSynthesisUtterance(txt);u.lang='es-ES';u.rate=parseFloat($('audRate').value);u.onend=function(){$('audPlay').textContent='Reproducir';$('audMsg').textContent='Audio terminado.'};
+  synth.speak(u);this.textContent='Pausar';$('audMsg').textContent='Reproduciendo…'});
+$('audStop').addEventListener('click',function(){stopAud();$('audMsg').textContent='Detenido.'});
+
+/* video simulado */
+var scenes=[
+ ['Leer con un plan','Hoy vas a aprender una rutina de tres pasos para leer artículos académicos.'],
+ ['Paso 1: previsualiza','Mira el título, el resumen, los subtítulos y la última sección. Escribe una predicción de una oración.'],
+ ['Paso 2: anota','Marca con ? lo que no entiendes, con ★ la idea principal y con → la evidencia.'],
+ ['Paso 3: resume','Escribe tres oraciones: el problema, lo que encontró el autor y la evidencia más fuerte.'],
+ ['Ahora te toca','Aplica la rutina al texto de práctica del Momento 3. Puedes hacerlo en tres hitos.']];
+var vi=0,vt=null;
+var vl=$('vidTranscript');scenes.forEach(function(s){var li=document.createElement('li');li.textContent=s[1];vl.appendChild(li)});
+function drawV(){$('vidBig').textContent=scenes[vi][0];$('vidCap').textContent=scenes[vi][1];$('vidPos').textContent='Escena '+(vi+1)+' de '+scenes.length}
+function stopVid(){clearInterval(vt);vt=null;$('vidPlay').textContent='Reproducir'}
+$('vidPlay').addEventListener('click',function(){if(vt){stopVid();return}this.textContent='Pausar';vt=setInterval(function(){if(vi<scenes.length-1){vi++;drawV()}else stopVid()},7000)});
+$('vidNext').addEventListener('click',function(){vi=Math.min(vi+1,scenes.length-1);drawV()});
+$('vidPrev').addEventListener('click',function(){vi=Math.max(vi-1,0);drawV()});
+drawV();
+
+/* quiz */
+var qs=[
+ {q:'¿Qué haces ANTES de leer el artículo completo?',o:['Leer todo de corrido','Mirar título, resumen y subtítulos y escribir una predicción','Buscar el resumen de otra persona'],a:1,f:'La previsualización te da un mapa de lo que vas a leer.'},
+ {q:'¿Qué significa la marca → en las anotaciones?',o:['Una duda','La idea principal','Evidencia que presenta el autor'],a:2,f:'? es duda y ★ es idea principal.'},
+ {q:'¿Cuántas oraciones tiene el resumen final?',o:['Una','Tres','Diez'],a:1,f:'Problema, hallazgo y evidencia.'}];
+var qb=$('quiz');
+qs.forEach(function(q,i){var fs=document.createElement('fieldset'),lg=document.createElement('legend');lg.textContent=(i+1)+'. '+q.q;fs.appendChild(lg);
+ q.o.forEach(function(o,j){var d=document.createElement('div');d.className='opt';var r=document.createElement('input');r.type='radio';r.name='q'+i;r.id='q'+i+'_'+j;var l=document.createElement('label');l.htmlFor=r.id;l.textContent=o;d.appendChild(r);d.appendChild(l);fs.appendChild(d)});
+ var fb=document.createElement('p');fb.setAttribute('role','status');fb.setAttribute('aria-live','polite');fs.appendChild(fb);
+ fs.addEventListener('change',function(){var v=fs.querySelector('input:checked');var j=+v.id.split('_')[1];fb.innerHTML=j===q.a?'<span class="ok">Correcto.</span> '+q.f:'<span class="bad">Todavía no.</span> '+q.f+' Intenta de nuevo.'});
+ qb.appendChild(fs)});
+
+/* diagnóstico inicial */
+var preTxt={1:'Perfecto: esta semana empiezas desde cero y la rutina te da un plan claro. Ve despacio y usa el ejemplo resuelto.',2:'Bien. La rutina te ayuda a no perderte: la previsualización y las marcas son lo que más cambia.',3:'Genial. Compara tu método con la rutina de tres pasos y quédate con lo que te sirva.'};
+document.querySelectorAll('input[name=pre]').forEach(function(r){r.addEventListener('change',function(){$('preMsg').textContent=preTxt[r.value];store.set('pre',r.value)})});
+var pv=store.get('pre');if(pv&&$('pre'+pv)){$('pre'+pv).checked=true;$('preMsg').textContent=preTxt[pv]}
+
+/* anotador interactivo */
+var sents=['Los estudiantes que organizan su estudio en bloques cortos con pausas retienen más información que quienes estudian en una sola sesión larga.','En un estudio con 120 universitarios, el grupo con bloques de 25 minutos obtuvo 18 % más de aciertos en la prueba final.','Los autores concluyen que dividir la lectura reduce la fatiga y mejora la atención sostenida.'];
+var expert=['★','→','★'],why=['Es la idea principal: afirma lo que el texto defiende.','Es evidencia: presenta un dato de un estudio.','Es la conclusión de los autores, también una idea principal.'];
+var cyc=['','★','→','?'],nm={'':'sin marca','★':'idea principal','→':'evidencia','?':'duda'},mk=[0,0,0];
+var ab=$('annot');
+sents.forEach(function(s,i){var b=document.createElement('button');b.type='button';b.className='sent';b.dataset.m='';var m=document.createElement('span');m.className='mk';m.setAttribute('aria-hidden','true');m.textContent='·';var t=document.createElement('span');t.textContent=s;b.appendChild(m);b.appendChild(t);
+ function paint(){var c=cyc[mk[i]];b.dataset.m=c;m.textContent=c||'·';b.setAttribute('aria-label','Oración '+(i+1)+', marca actual: '+nm[c]+'. '+s);b.classList.remove('good','miss')}
+ b.addEventListener('click',function(){mk[i]=(mk[i]+1)%4;paint();$('annotFb').innerHTML=''});paint();ab.appendChild(b)});
+$('annotCheck').addEventListener('click',function(){var ok=0,h='';
+ [].slice.call(ab.children).forEach(function(b,i){var c=cyc[mk[i]];var g=c===expert[i];if(g)ok++;b.classList.toggle('good',g);b.classList.toggle('miss',!g);h+='<p><strong>Oración '+(i+1)+':</strong> '+(g?'<span class="ok">acertaste.</span> ':'<span class="bad">una marca más útil es '+expert[i]+'.</span> ')+why[i]+'</p>'});
+ $('annotFb').innerHTML='<p><strong>'+ok+' de 3 marcas coinciden.</strong> '+(ok===3?'¡Muy bien! Ya puedes pasar al resumen.':'No pasa nada: otras marcas pueden tener sentido, lo importante es poder explicarlas.')+'</p>'+h});
+$('annotReset').addEventListener('click',function(){mk=[0,0,0];[].slice.call(ab.children).forEach(function(b,i){b.dataset.m='';b.firstChild.textContent='·';b.setAttribute('aria-label','Oración '+(i+1)+', marca actual: sin marca. '+sents[i]);b.classList.remove('good','miss')});$('annotFb').innerHTML=''});
+
+/* generic helpers */
+function msg(id,t){$(id).textContent=t}
+function stamp(){return new Date().toLocaleString('es-PR',{dateStyle:'short',timeStyle:'short'})}
+$('sendAvance').addEventListener('click',function(){if(!$('w3').value.trim()){msg('avMsg','Escribe al menos tu resumen (campo 3) antes de enviar.');return}msg('avMsg','Avance enviado el '+stamp()+'. Recibirás retroalimentación en 24 horas hábiles.')});
+$('peerBtn').addEventListener('click',function(){if(!$('peer').value.trim()){msg('peerMsg','Escribe un comentario primero.');return}msg('peerMsg','Comentario publicado.')});
+
+/* entrega */
+function fmtChange(){var v=document.querySelector('input[name=fmtE]:checked').value;$('subText').hidden=v!=='texto';$('subFile').hidden=v==='texto'}
+document.querySelectorAll('input[name=fmtE]').forEach(function(r){r.addEventListener('change',fmtChange)});
+$('subForm').addEventListener('submit',function(e){e.preventDefault();var v=document.querySelector('input[name=fmtE]:checked').value;
+ if(!$('subRef').value.trim()){msg('subMsg','Escribe la referencia del artículo.');return}
+ if(v==='texto'&&!$('subBody').value.trim()){msg('subMsg','Escribe tu resumen.');return}
+ if(v!=='texto'&&!$('subUp').files.length){msg('subMsg','Selecciona un archivo.');return}
+ msg('subMsg','Entrega recibida ('+v+') el '+stamp()+'. Se evaluará con la rúbrica de arriba.')});
+
+/* reflexión */
+$('refForm').addEventListener('submit',function(e){e.preventDefault();if(!$('r1').value.trim()||!$('r2').value.trim()){msg('refMsg','Responde las dos preguntas.');return}msg('refMsg','Reflexión guardada.')});
+
+/* usabilidad */
+var items=['La navegación me resultó fácil de entender.','Sentí que había demasiada información a la vez.','Pude escoger el formato que me convenía.','Las instrucciones fueron claras.','Necesité mucho esfuerzo mental para usar la plataforma.'];
+items.forEach(function(t,i){var fs=document.createElement('fieldset'),lg=document.createElement('legend');lg.textContent=t;fs.appendChild(lg);var row=document.createElement('div');row.className='row';
+ for(var n=1;n<=5;n++){var l=document.createElement('label');l.className='opt';var r=document.createElement('input');r.type='radio';r.name='u'+i;r.value=n;r.id='u'+i+'_'+n;l.appendChild(r);l.appendChild(document.createTextNode(String(n)));row.appendChild(l)}
+ fs.appendChild(row);$('useItems').appendChild(fs)});
+$('useForm').addEventListener('submit',function(e){e.preventDefault();var n=document.querySelectorAll('#useItems input:checked').length;if(n<items.length){msg('useMsg','Responde las '+items.length+' preguntas ('+n+' contestadas).');return}msg('useMsg','Gracias. Cuestionario enviado.')});
+
+/* foro */
+$('forumForm').addEventListener('submit',function(e){e.preventDefault();var v=$('fq').value.trim();if(!v){msg('fMsg','Escribe tu pregunta.');return}var li=document.createElement('li');li.textContent=v+' (publicada '+stamp()+', pendiente de respuesta)';$('fList').prepend(li);$('fq').value='';msg('fMsg','Pregunta publicada.')});
+})();
+</script>
+
+</body>
+</html>
